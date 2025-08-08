@@ -15,11 +15,14 @@ description = 'Maven plugin to integrate aspects of Hibernate into your build.'
 dependencies {
     implementation project( ":hibernate-core" )
 
-    implementation "org.apache.maven:maven-plugin-api:3.6.3"
+    implementation "org.apache.maven:maven-plugin-api:3.9.11"
     implementation "org.apache.maven:maven-project:2.2.1"
-    implementation "org.apache.maven.shared:file-management:3.1.0"
+    implementation "org.apache.maven.shared:file-management:3.2.0"
 
-    compileOnly "org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0"
+    compileOnly "org.apache.maven.plugin-tools:maven-plugin-annotations:3.15.1"
+
+    testImplementation "org.apache.maven:maven-embedder:3.9.11"
+
 }
 
 def releasePrepareTask = tasks.register("releasePrepare") {
@@ -35,6 +38,10 @@ tasks.register("preVerifyRelease") {
     description "Delegates to `releasePrepare` task"
 
     dependsOn releasePrepareTask
+}
+
+test {
+    environment "projectVersion", "${project.version}"
 }
 
 var publishingExtension = project.getExtensions().getByType(PublishingExtension) as PublishingExtension
