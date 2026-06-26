@@ -14,6 +14,7 @@ public enum ExporterType {
 	HBM ("org.hibernate.tool.reveng.internal.export.hbm.HbmExporter"),
 	HBM_LINT ("org.hibernate.tool.reveng.internal.export.lint.HbmLintExporter"),
 	JAVA ("org.hibernate.tool.reveng.internal.export.java.JavaExporter"),
+	LIQUIBASE ("org.hibernate.tool.reveng.internal.export.liquibase.LiquibaseExporter"),
 	QUERY ("org.hibernate.tool.reveng.internal.export.query.QueryExporter");
 
 	private String className;

@@ -24,4 +24,7 @@ public interface ExporterConstants {
 	public static final String TEMPLATE_NAME = "org.hibernate.tool.api.export.ExporterConstants.TemplateName";
 	public static final String TEMPLATE_PATH = "org.hibernate.tool.api.export.ExporterConstants.TemplatePath";
 
+	public static final String CHANGELOG_FORMAT = "org.hibernate.tool.reveng.internal.export.liquibase.ChangelogFormat";
+	public static final String CHANGESET_AUTHOR = "org.hibernate.tool.reveng.internal.export.liquibase.ChangesetAuthor";
+
 }
