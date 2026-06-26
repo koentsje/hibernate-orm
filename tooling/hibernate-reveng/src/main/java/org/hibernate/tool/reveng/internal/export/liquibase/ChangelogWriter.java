@@ -1,0 +1,13 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright Red Hat Inc. and Hibernate Authors
+ */
+package org.hibernate.tool.reveng.internal.export.liquibase;
+
+import java.io.File;
+import java.util.List;
+
+public interface ChangelogWriter {
+
+	void write(List<SchemaChange> changes, File outputFile, String author);
+}
