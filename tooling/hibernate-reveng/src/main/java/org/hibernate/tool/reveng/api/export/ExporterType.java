@@ -9,6 +9,7 @@ public enum ExporterType {
 	CFG ("org.hibernate.tool.reveng.internal.export.cfg.CfgExporter"),
 	DAO ("org.hibernate.tool.reveng.internal.export.dao.DaoExporter"),
 	DDL ("org.hibernate.tool.reveng.internal.export.ddl.DdlExporter"),
+	FLYWAY ("org.hibernate.tool.reveng.internal.export.flyway.FlywayExporter"),
 	DOC ("org.hibernate.tool.reveng.internal.export.doc.DocExporter"),
 	GENERIC ("org.hibernate.tool.reveng.internal.export.common.GenericExporter"),
 	HBM ("org.hibernate.tool.reveng.internal.export.hbm.HbmExporter"),

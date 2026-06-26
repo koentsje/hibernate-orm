@@ -24,4 +24,7 @@ public interface ExporterConstants {
 	public static final String TEMPLATE_NAME = "org.hibernate.tool.api.export.ExporterConstants.TemplateName";
 	public static final String TEMPLATE_PATH = "org.hibernate.tool.api.export.ExporterConstants.TemplatePath";
 
+	public static final String MIGRATION_VERSION = "org.hibernate.tool.api.export.ExporterConstants.MigrationVersion";
+	public static final String MIGRATION_DESCRIPTION = "org.hibernate.tool.api.export.ExporterConstants.MigrationDescription";
+
 }
