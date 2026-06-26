@@ -139,7 +139,7 @@ public abstract class AbstractGenerationMojo extends AbstractMojo {
 						properties);
 	}
 
-	private ClassLoader createExporterClassLoader(ClassLoader parent) {
+	protected ClassLoader createExporterClassLoader(ClassLoader parent) {
 		ArrayList<URL> urls = new ArrayList<URL>();
 		try {
 			for (String cpe : project.getRuntimeClasspathElements()) {
@@ -150,6 +150,10 @@ public abstract class AbstractGenerationMojo extends AbstractMojo {
 			throw new RuntimeException("Problem while constructing project classloader", e);
 		}
 		return new URLClassLoader(urls.toArray(new URL[0]), parent);
+	}
+
+	protected File getPropertyFile() {
+		return propertyFile;
 	}
 
 	protected abstract void executeExporter(MetadataDescriptor metadataDescriptor) throws MojoFailureException;
