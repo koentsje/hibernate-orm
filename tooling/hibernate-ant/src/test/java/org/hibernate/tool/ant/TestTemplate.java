@@ -72,7 +72,7 @@ public abstract class TestTemplate {
 		assertTrue(generatedPersonJavaFile.isFile());
 	}
 
-	private void runAntBuild() {
+	protected void runAntBuild() {
 		File buildXmlFile = new File(getProjectDir(), "build.xml");
 		Project project = new Project();
 		project.setBaseDir(getProjectDir());
@@ -81,18 +81,18 @@ public abstract class TestTemplate {
 		project.executeTarget(project.getDefaultTarget());
 	}
 
-	private void createBuildXmlFile() throws Exception {
+	protected void createBuildXmlFile() throws Exception {
 		File buildXmlFile = new File(getProjectDir(), "build.xml");
 		assertFalse(buildXmlFile.exists());
 		Files.writeString(buildXmlFile.toPath(), constructBuildXmlFileContents());
 		assertTrue(buildXmlFile.exists());
 	}
 
-	private String constructJdbcConnectionString() {
+	protected String constructJdbcConnectionString() {
 		return "jdbc:h2:file:" + getProjectDir().getAbsolutePath().replace( '\\', '/' ) + "/database/test;AUTO_SERVER=TRUE";
 	}
 
-	private void createDatabase() throws Exception {
+	protected void createDatabase() throws Exception {
 		File databaseFile = new File(getProjectDir(), "database/test.mv.db");
 		assertFalse(databaseFile.exists());
 		assertFalse(databaseFile.isFile());
