@@ -18,5 +18,8 @@ public class RevengSpec {
 	public Boolean generateAnnotations = true;
 	public Boolean useGenerics = true;
 	public String templatePath = null;
+	public String migrationVersion = null;
+	public String migrationDescription = null;
+	public String persistenceUnit = "default";
 
 }

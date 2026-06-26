@@ -24,6 +24,7 @@ import org.hibernate.orm.tooling.gradle.reveng.GenerateCfgTask;
 import org.hibernate.orm.tooling.gradle.reveng.GenerateDaoTask;
 import org.hibernate.orm.tooling.gradle.reveng.GenerateHbmTask;
 import org.hibernate.orm.tooling.gradle.reveng.GenerateJavaTask;
+import org.hibernate.orm.tooling.gradle.reveng.GenerateFlywayTask;
 import org.hibernate.orm.tooling.gradle.reveng.RunSqlTask;
 
 /**
@@ -36,7 +37,8 @@ public class HibernateOrmPlugin implements Plugin<Project> {
 			"generateJava", GenerateJavaTask.class,
 			"generateCfg", GenerateCfgTask.class,
 			"generateHbm", GenerateHbmTask.class,
-			"generateDao", GenerateDaoTask.class
+			"generateDao", GenerateDaoTask.class,
+			"generateFlyway", GenerateFlywayTask.class
 	);
 
 	@Override
@@ -124,6 +126,9 @@ public class HibernateOrmPlugin implements Plugin<Project> {
 		for ( Map.Entry<String, Class<? extends RevengTask>> entry : REVENG_TASK_MAP.entrySet() ) {
 			project.getTasks().register( entry.getKey(), entry.getValue(), task -> {
 				task.doFirst( w -> task.initialize( ormDsl.getReveng() ) );
+				if ( task instanceof GenerateFlywayTask ) {
+					task.dependsOn( "classes" );
+				}
 			} );
 		}
 	}
