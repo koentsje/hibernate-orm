@@ -5,7 +5,8 @@ Hibernate provides https://ant.apache.org/[Ant] support.
 Everything Ant related is available from the
 https://central.sonatype.com/artifact/org.hibernate.orm/hibernate-ant[hibernate-ant]
 library.  The Ant integration supports <<tooling-ant-enhancement,bytecode enhancement>>,
-<<tooling-ant-modelgen,metamodel generation>>, and <<tooling-ant-reveng,reverse engineering>>.
+<<tooling-ant-modelgen,metamodel generation>>, <<tooling-ant-reveng,reverse engineering>>,
+and <<tooling-ant-schema,schema management>>.
 
 [[tooling-ant-enhancement]]
 ==== Bytecode Enhancement ====
@@ -197,7 +198,7 @@ Ant's https://ant.apache.org/manual/Tasks/javac.html[javac] task.
 ==== Reverse Engineering
 
 Hibernate provides an Ant task for <<tooling-reveng,reverse engineering>> an existing database
-into Java entities, mapping files, DAOs, configuration files, and DDL scripts.
+into Java entities, mapping files, DAOs, configuration files, DDL scripts, and Flyway migrations.
 
 
 [[tooling-ant-reveng-task]]
@@ -320,8 +321,72 @@ To generate multiple artifact types in a single run, add additional exporter ele
 </hibernatetool>
 ----
 
-
 [[tooling-ant-schema]]
 ==== Schema Management
 
-Coming soon
+The `<flyway>` exporter generates Flyway versioned migration files by comparing JPA entity
+classes against the existing database using `SchemaUpdate`. Unlike the reverse engineering
+exporters which read _from_ the database, the Flyway exporter works in the opposite direction:
+entity classes define the target schema, and the migration captures the diff.
+
+Use `<jpaconfiguration>` (not `<jdbcconfiguration>`) so that entity classes are discovered
+via JPA bootstrapping from a `persistence.xml`.
+
+
+[[tooling-ant-schema-flyway]]
+===== `<flyway>` Exporter
+
+The `<flyway>` exporter supports the following attributes:
+
+`migrationVersion`:: The version number for the generated migration file. Default: `1`.
+`migrationDescription`:: A human-readable description. Spaces are replaced with underscores. Default: `hibernate_schema_update`.
+`delimiter`:: The end-of-statement delimiter. Default: `;`.
+`format`:: Whether to format the SQL output. Default: `true`.
+`haltonerror`:: Whether to stop on the first error. Default: `false`.
+
+The generated file follows the Flyway naming convention: `V{version}__{description}.sql`.
+
+
+[[tooling-ant-schema-example]]
+===== Example
+
+Create a `META-INF/persistence.xml` under your classes directory with your JDBC connection settings:
+
+[source,xml]
+----
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
+    <persistence-unit name="default">
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/./mydb"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+        </properties>
+    </persistence-unit>
+</persistence>
+----
+
+Hibernate scans the persistence unit root for annotated entity classes automatically. As long as
+`META-INF/persistence.xml` and the compiled entity classes are in the same classpath entry,
+scanning finds entities without further configuration. If you prefer to list entity classes
+explicitly, add `<class>` elements and `<exclude-unlisted-classes>true</exclude-unlisted-classes>`
+to the persistence unit.
+
+Then define a target that compiles the entity classes first and runs the Flyway exporter:
+
+[source,xml]
+----
+<target name="flyway-migration" depends="compile">
+    <hibernatetool destdir="${build.dir}/migrations">
+        <classpath>
+            <pathelement location="${build.dir}/classes"/>
+        </classpath>
+        <jpaconfiguration persistenceunit="default"/>
+        <flyway migrationVersion="2" migrationDescription="add_email_column"/>
+    </hibernatetool>
+</target>
+----
+
+The `<classpath>` must include the directory containing `META-INF/persistence.xml`
+and the compiled entity classes. Running `ant flyway-migration` generates
+`V2__add_email_column.sql` in the output directory.

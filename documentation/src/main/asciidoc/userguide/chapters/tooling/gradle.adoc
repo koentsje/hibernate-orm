@@ -3,7 +3,7 @@
 
 Hibernate provides the ability to integrate
 <<tooling-gradle-enhancement,bytecode enhancement>>, <<tooling-gradle-modelgen,metamodel generation>>,
-and <<tooling-gradle-reveng,reverse engineering>> capabilities into Gradle builds.
+<<tooling-gradle-reveng,reverse engineering>>, and <<tooling-gradle-schema,schema management>> capabilities into Gradle builds.
 
 [[tooling-gradle-enhancement]]
 ==== Bytecode Enhancement
@@ -74,7 +74,7 @@ dependencies {
 
 The <<tooling-gradle-enhancement,Hibernate ORM Gradle plugin>> also provides
 <<tooling-reveng,reverse engineering>> capabilities to generate Java entities, mapping files,
-DAOs, configuration files, and DDL scripts from an existing database.
+DAOs, configuration files, DDL scripts, and Flyway migrations from an existing database.
 
 NOTE: The Gradle configuration cache must be disabled when using reverse engineering tasks.
 Add `org.gradle.configuration-cache=false` to your `gradle.properties` file.
@@ -168,3 +168,108 @@ hibernate {
     }
 }
 ----
+
+
+[[tooling-gradle-schema]]
+==== Schema Management
+
+The Hibernate ORM Gradle plugin provides a `generateFlyway` task that generates Flyway versioned
+migration files by comparing JPA entity classes against the existing database using `SchemaUpdate`.
+Unlike the reverse engineering tasks which read _from_ the database, the Flyway task works in the
+opposite direction: entity classes define the target schema, and the migration captures the diff.
+
+The task automatically depends on `classes` so that entity classes are compiled first.
+
+
+[[tooling-gradle-schema-configuration]]
+===== Configuration
+
+Flyway migration settings are configured through the `reveng` block inside the `hibernate` extension:
+
+[source,gradle]
+----
+hibernate {
+    reveng {
+        persistenceUnit = 'default'
+        migrationVersion = '2'
+        migrationDescription = 'add email column'
+    }
+}
+----
+
+`persistenceUnit`:: The name of the JPA persistence unit to use for entity discovery. The `META-INF/persistence.xml` must be in the project's main resource set. Default: `default`.
+`migrationVersion`:: The version number for the generated migration file. Default: `null` (uses the exporter default of `1`).
+`migrationDescription`:: A human-readable description for the migration. Spaces are replaced with underscores. Default: `null` (uses the exporter default of `hibernate_schema_update`).
+
+The generated file follows the Flyway naming convention: `V{version}__{description}.sql`.
+
+
+[[tooling-gradle-schema-example]]
+===== Example
+
+Create a `META-INF/persistence.xml` in `src/main/resources/` that lists your entity classes explicitly:
+
+[source,xml]
+----
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
+    <persistence-unit name="default">
+        <class>com.example.model.Person</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/./mydb"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+        </properties>
+    </persistence-unit>
+</persistence>
+----
+
+NOTE: Gradle places resources in `build/resources/main/` and compiled classes in
+`build/classes/java/main/` — separate directories. Hibernate scans the persistence unit root
+(where `META-INF/persistence.xml` lives), which is the resources directory, so entity classes
+in the classes directory are not found automatically. Listing them with `<class>` elements
+is the simplest solution. Alternatively, you can copy `persistence.xml` into the classes
+directory so that everything shares the same root:
+
+[source,gradle]
+----
+tasks.named('generateFlyway') {
+    doFirst {
+        copy {
+            from 'src/main/resources/META-INF/persistence.xml'
+            into "${sourceSets.main.java.classesDirectory.get()}/META-INF"
+        }
+    }
+}
+----
+
+Configure the Flyway migration settings in `build.gradle`:
+
+[source,gradle,subs="attributes+"]
+----
+plugins {
+    id 'java'
+    id 'org.hibernate.orm' version '{fullVersion}'
+}
+
+dependencies {
+    implementation 'com.h2database:h2:2.2.224'
+}
+
+hibernate {
+    reveng {
+        migrationVersion = '2'
+        migrationDescription = 'add email column'
+    }
+}
+----
+
+Run the generation with:
+
+[source,bash]
+----
+gradle generateFlyway
+----
+
+This compiles the entity classes and then generates `V2__add_email_column.sql` in the output directory.
