@@ -5,7 +5,8 @@ Hibernate provides https://ant.apache.org/[Ant] support.
 Everything Ant related is available from the
 https://central.sonatype.com/artifact/org.hibernate.orm/hibernate-ant[hibernate-ant]
 library.  The Ant integration supports <<tooling-ant-enhancement,bytecode enhancement>>,
-<<tooling-ant-modelgen,metamodel generation>>, and <<tooling-ant-reveng,reverse engineering>>.
+<<tooling-ant-modelgen,metamodel generation>>, <<tooling-ant-reveng,reverse engineering>>,
+and <<tooling-ant-schema,schema management>>.
 
 [[tooling-ant-enhancement]]
 ==== Bytecode Enhancement ====
@@ -269,6 +270,7 @@ Each exporter supports a `destdir` attribute to override the output directory.
 `<hbm2doc>`:: Generates HTML documentation of the database schema.
 `<hbmtemplate>`:: Runs a custom FreeMarker template for user-defined code generation.
 `<query>`:: Executes HQL queries against the configured metadata.
+`<liquibase>`:: Generates a Liquibase changelog from schema differences.
 
 
 [[tooling-ant-reveng-example]]
@@ -324,4 +326,25 @@ To generate multiple artifact types in a single run, add additional exporter ele
 [[tooling-ant-schema]]
 ==== Schema Management
 
-Coming soon
+
+[[tooling-ant-schema-liquibase]]
+===== Liquibase Changelog Generation
+
+The `<liquibase>` exporter compares the entity model against the current database schema and
+generates a Liquibase XML changelog containing the differences.
+
+[source,xml]
+----
+<hibernatetool destdir="${build.dir}/generated-resources">
+    <jpaconfiguration persistenceunit="default"/>
+    <liquibase/>
+</hibernatetool>
+----
+
+The `<liquibase>` element supports the following attributes:
+
+`outputFileName`:: The name of the generated changelog file. Default: `changelog.xml`.
+`changelogFormat`:: The output format. Currently only `xml` is supported. Default: `xml`.
+`changesetAuthor`:: The author recorded in each changeset. Default: `hibernate`.
+`haltonerror`:: Whether to stop the build on errors. Default: `false`.
+`destdir`:: Override the output directory for this exporter.

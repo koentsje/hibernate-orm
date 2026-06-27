@@ -3,7 +3,8 @@
 
 Hibernate provides the ability to integrate
 <<tooling-gradle-enhancement,bytecode enhancement>>, <<tooling-gradle-modelgen,metamodel generation>>,
-and <<tooling-gradle-reveng,reverse engineering>> capabilities into Gradle builds.
+<<tooling-gradle-reveng,reverse engineering>>,
+and <<tooling-gradle-liquibase,Liquibase changelog generation>> capabilities into Gradle builds.
 
 [[tooling-gradle-enhancement]]
 ==== Bytecode Enhancement
@@ -168,3 +169,51 @@ hibernate {
     }
 }
 ----
+
+
+[[tooling-gradle-liquibase]]
+==== Liquibase Changelog Generation
+
+The Hibernate ORM Gradle plugin provides a `generateLiquibase` task that compares your JPA
+entity model against the current database schema and generates a Liquibase XML changelog
+containing the differences.  The task depends on `classes`, so entity classes are compiled
+first.
+
+
+[[tooling-gradle-liquibase-configuration]]
+===== Task Configuration
+
+The task exposes the following properties that can be set directly:
+
+[source,gradle]
+----
+tasks.named('generateLiquibase') {
+    persistenceUnit = 'default'
+    outputFileName = 'changelog.xml'
+    changelogFormat = 'xml'
+    changesetAuthor = 'hibernate'
+    haltOnError = false
+}
+----
+
+`persistenceUnit`:: The name of the JPA persistence unit to use. Default: `default`.
+`outputDirectory`:: The directory where the changelog file is written. Default: `build/generated-resources`.
+`outputFileName`:: The name of the generated changelog file. Default: `changelog.xml`.
+`changelogFormat`:: The output format. Currently only `xml` is supported. Default: `xml`.
+`changesetAuthor`:: The author recorded in each changeset. Default: `hibernate`.
+`haltOnError`:: Whether to stop the build on errors. Default: `false`.
+
+
+[[tooling-gradle-liquibase-example]]
+===== Example
+
+Run the generation with:
+
+[source,bash]
+----
+gradle generateLiquibase
+----
+
+The task reads the entity model from the specified persistence unit, connects to the database
+configured in the persistence unit properties, and writes a changelog containing `<createTable>`,
+`<addColumn>`, and other change types for any differences found.

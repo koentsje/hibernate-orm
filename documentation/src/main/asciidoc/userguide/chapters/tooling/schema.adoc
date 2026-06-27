@@ -1,4 +1,45 @@
 [[tooling-schema]]
 === Schema Management
 
-Coming soon
+Hibernate provides build-time tooling to compare your JPA entity model against an existing
+database schema and generate migration artifacts from the differences.  This is useful for
+keeping a database in sync with evolving entity mappings without writing migration scripts
+by hand.
+
+See the tool-specific discussions (<<tooling-gradle-liquibase,Gradle>>,
+<<tooling-maven-liquibase,Maven>> and <<tooling-ant-schema-liquibase,Ant>>) for details
+on integrating schema management into those environments.
+
+
+[[tooling-schema-liquibase]]
+==== Liquibase Changelog Generation
+
+The Liquibase exporter reads the entity model from a JPA persistence unit, connects to the
+database configured in the persistence unit properties, and compares the two.  For each
+difference it finds, it emits a structured Liquibase change:
+
+`createTable`:: A table exists in the entity model but not in the database.
+`addColumn`:: A column exists in the entity model but not in the corresponding database table.
+`addForeignKeyConstraint`:: A foreign key exists in the entity model but not in the database.
+`createIndex`:: An index exists in the entity model but not in the database.
+`addUniqueConstraint`:: A unique constraint exists in the entity model but not in the database.
+
+The output is a Liquibase XML changelog file that can be fed directly to Liquibase for
+execution, or reviewed and edited before applying.
+
+If no differences are found, no changelog file is generated.
+
+
+[[tooling-schema-liquibase-configuration]]
+===== Common Configuration
+
+Regardless of the build tool, the following settings are available:
+
+`persistenceUnit`:: The name of the JPA persistence unit to read the entity model from.
+  The persistence unit's properties provide the JDBC connection used for comparison.
+  Default: `default`.
+`outputFileName`:: The name of the generated changelog file. Default: `changelog.xml`.
+`changelogFormat`:: The output format. Currently only `xml` is supported. Default: `xml`.
+`changesetAuthor`:: The author recorded in each changeset. Default: `hibernate`.
+`haltOnError`:: Whether to stop the build when an error occurs during generation.
+  Default: `false`.

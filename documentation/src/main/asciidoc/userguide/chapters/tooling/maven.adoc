@@ -3,6 +3,7 @@
 
 The following sections illustrate how <<tooling-maven-enhancement,bytecode enhancement>>,
 <<tooling-maven-modelgen,metamodel generation>>, <<tooling-maven-reveng,reverse engineering>>,
+<<tooling-maven-liquibase,Liquibase changelog generation>>,
 and <<tooling-maven-transformhbm,HBM XML transformation>>
 capabilities can be integrated into Maven builds.
 
@@ -317,6 +318,66 @@ Run the generation with:
 ----
 mvn generate-sources
 ----
+
+
+[[tooling-maven-liquibase]]
+==== Liquibase Changelog Generation
+
+The `hibernate-maven-plugin` provides a `liquibase` goal that compares your JPA entity model
+against the current database schema and generates a Liquibase XML changelog containing the
+differences.  The goal binds to the `process-classes` phase by default, so entity classes
+must be compiled before it runs.
+
+
+[[tooling-maven-liquibase-plugin]]
+===== Plugin Declaration
+
+[source,xml,subs="attributes+"]
+----
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-maven-plugin</artifactId>
+            <version>{fullVersion}</version>
+            <executions>
+                <execution>
+                    <id>generate-liquibase-changelog</id>
+                    <goals>
+                        <goal>liquibase</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+----
+
+
+[[tooling-maven-liquibase-params]]
+===== Parameters
+
+`persistenceUnit`:: The name of the JPA persistence unit to use. Default: `default`.
+`outputDirectory`:: The directory where the changelog file is written. Default: `${project.build.directory}/generated-resources/`.
+`outputFileName`:: The name of the generated changelog file. Default: `changelog.xml`.
+`changelogFormat`:: The output format. Currently only `xml` is supported. Default: `xml`.
+`changesetAuthor`:: The author recorded in each changeset. Default: `hibernate`.
+`haltOnError`:: Whether to stop the build on errors. Default: `false`.
+
+
+[[tooling-maven-liquibase-example]]
+===== Example
+
+Run the generation with:
+
+[source,bash]
+----
+mvn process-classes
+----
+
+The goal reads the entity model from the specified persistence unit, connects to the database
+configured in the persistence unit properties, and writes a changelog containing `<createTable>`,
+`<addColumn>`, and other change types for any differences found.
 
 
 [[tooling-maven-transformhbm]]
