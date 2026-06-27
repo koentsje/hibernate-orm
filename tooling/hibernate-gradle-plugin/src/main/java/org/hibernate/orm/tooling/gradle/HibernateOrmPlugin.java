@@ -52,6 +52,7 @@ public class HibernateOrmPlugin implements Plugin<Project> {
 			prepareEnhancement( ormDsl, project );
 			prepareHbmTransformation( ormDsl, project );
 			prepareReveng( ormDsl, project );
+			prepareLiquibase( project );
 
 			project
 					.getExtensions()
@@ -117,6 +118,12 @@ public class HibernateOrmPlugin implements Plugin<Project> {
 
 	private void prepareHbmTransformation(HibernateOrmSpec ormDsl, Project project) {
 
+	}
+
+	private void prepareLiquibase(Project project) {
+		project.getTasks().register( "generateLiquibase", GenerateLiquibaseTask.class, task -> {
+			task.dependsOn( "classes" );
+		} );
 	}
 
 	@SuppressWarnings("unchecked")
