@@ -106,6 +106,15 @@ public class HibernateToolTaskTest {
 	}
 
 	@Test
+	public void testCreateLiquibase() {
+		HibernateToolTask task = new HibernateToolTask();
+		ExporterTask gen = task.createLiquibase();
+		assertNotNull(gen);
+		assertTrue(gen instanceof LiquibaseExporterTask);
+		assertEquals(1, task.generators.size());
+	}
+
+	@Test
 	public void testCreateQuery() {
 		HibernateToolTask task = new HibernateToolTask();
 		QueryExporterTask gen = task.createQuery();

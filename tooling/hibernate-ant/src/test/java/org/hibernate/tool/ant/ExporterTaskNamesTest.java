@@ -49,6 +49,29 @@ public class ExporterTaskNamesTest {
 	}
 
 	@Test
+	public void testLiquibaseExporterTaskName() {
+		assertEquals("liquibase (Generates a Liquibase changelog)",
+				new LiquibaseExporterTask(parent).getName());
+	}
+
+	@Test
+	public void testLiquibaseSetters() {
+		LiquibaseExporterTask task = new LiquibaseExporterTask(parent);
+		assertEquals("changelog.xml", task.outputFileName);
+		assertEquals("xml", task.changelogFormat);
+		assertEquals("hibernate", task.changesetAuthor);
+		assertEquals(false, task.haltOnError);
+		task.setOutputFileName("migrations.xml");
+		task.setChangelogFormat("yaml");
+		task.setChangesetAuthor("koen");
+		task.setHaltonerror(true);
+		assertEquals("migrations.xml", task.outputFileName);
+		assertEquals("yaml", task.changelogFormat);
+		assertEquals("koen", task.changesetAuthor);
+		assertEquals(true, task.haltOnError);
+	}
+
+	@Test
 	public void testHbm2JavaSetters() {
 		Hbm2JavaExporterTask task = new Hbm2JavaExporterTask(parent);
 		task.setEjb3(false);

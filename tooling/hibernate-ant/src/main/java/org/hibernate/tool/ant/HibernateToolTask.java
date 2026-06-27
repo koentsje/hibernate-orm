@@ -124,6 +124,12 @@ public class HibernateToolTask extends Task {
 		return generator;
 	}
 
+	public ExporterTask createLiquibase() {
+		ExporterTask generator = new LiquibaseExporterTask( this );
+		addGenerator( generator );
+		return generator;
+	}
+
 	public HbmLintExporterTask createHbmLint() {
 		HbmLintExporterTask generator = new HbmLintExporterTask(this);
 		generators.add(generator);
